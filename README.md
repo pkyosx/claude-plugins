@@ -1,13 +1,13 @@
 # pkyosx-plugins
 
-Marketplace manifest for pkyosx's Claude Code plugins. Each plugin lives in its own repo; this repo just lists them so one `/plugin marketplace add` pulls everything.
+Monorepo for pkyosx's Claude Code plugins. One marketplace, many plugins.
 
 ## Plugins
 
-| Plugin | Repo | What it does |
-|---|---|---|
-| [`agent-retro`](https://github.com/pkyosx/claude-plugin-retro) | `pkyosx/claude-plugin-retro` | Retrospective + experience recall loop so agents learn across sessions. |
-| [`dont-touch-secrets`](https://github.com/pkyosx/claude-plugin-dont-touch-secrets) | `pkyosx/claude-plugin-dont-touch-secrets` | Keep credential values out of the conversation transcript. |
+| Plugin | What it does |
+|---|---|
+| [`agent-retro`](plugins/agent-retro) | Retrospective + experience recall loop so agents learn across sessions. |
+| [`dont-touch-secrets`](plugins/dont-touch-secrets) | Keep credential values out of the conversation transcript. |
 
 ## Install
 
@@ -16,6 +16,32 @@ Marketplace manifest for pkyosx's Claude Code plugins. Each plugin lives in its 
 /plugin install agent-retro@pkyosx-plugins
 /plugin install dont-touch-secrets@pkyosx-plugins
 ```
+
+## Repo layout
+
+```
+.
+├── .claude-plugin/marketplace.json   # lists every plugin
+└── plugins/
+    ├── agent-retro/
+    │   ├── .claude-plugin/plugin.json
+    │   └── skills/…
+    └── dont-touch-secrets/
+        ├── .claude-plugin/plugin.json
+        └── skills/…
+```
+
+Each plugin lives under `plugins/<name>/` with its own `plugin.json` and skills. The root `marketplace.json` references them via local paths (`"./plugins/<name>"`).
+
+## Adding a plugin
+
+1. Create `plugins/<name>/.claude-plugin/plugin.json` and `plugins/<name>/skills/<name>/SKILL.md`.
+2. Add an entry to `.claude-plugin/marketplace.json`.
+3. Commit, push, done.
+
+## History
+
+`agent-retro` and `dont-touch-secrets` were originally separate repos; their full commit history was preserved here via `git subtree add`.
 
 ## License
 
