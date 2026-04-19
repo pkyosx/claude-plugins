@@ -1,0 +1,17 @@
+{
+  "name": "pkyosx-plugins",
+  "owner": {
+    "name": "pkyosx",
+    "url": "https://github.com/pkyosx"
+  },
+  "plugins": [
+    {
+      "name": "agent-retro",
+      "source": {
+        "source": "github",
+        "repo": "pkyosx/claude-plugin-retro"
+      },
+      "description": "Agent learning loop — retrospective, experience recall, and deep memory search. Captures hard-won lessons from coding sessions, retrieves them before future tasks, and spawns subagents for thorough recall when stuck."
+    }
+  ]
+}
