@@ -1,0 +1,12 @@
+{
+  "name": "dont-touch-secrets",
+  "version": "0.1.0",
+  "description": "Keep secret values out of the conversation transcript. Provides safe patterns (fingerprint, exit-code, HTTP-status) for validating, comparing, rotating, and inspecting credentials without the agent ever reading the value.",
+  "author": {
+    "name": "pkyosx",
+    "url": "https://github.com/pkyosx"
+  },
+  "repository": "https://github.com/pkyosx/claude-plugin-dont-touch-secrets",
+  "license": "MIT",
+  "keywords": ["secrets", "credentials", "security", "hygiene", "transcript", "api-key", "private-key", "env"]
+}
