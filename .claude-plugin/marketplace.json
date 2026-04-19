@@ -1,0 +1,29 @@
+{
+  "name": "pkyosx-plugins",
+  "owner": {
+    "name": "pkyosx",
+    "url": "https://github.com/pkyosx"
+  },
+  "metadata": {
+    "description": "pkyosx's Claude Code plugins — marketplace manifest only; each plugin lives in its own repo.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "agent-retro",
+      "source": {
+        "source": "github",
+        "repo": "pkyosx/claude-plugin-retro"
+      },
+      "description": "Agent learning loop — retrospective, experience recall, and deep memory search. Captures hard-won lessons from coding sessions, retrieves them before future tasks, and spawns subagents for thorough recall when stuck."
+    },
+    {
+      "name": "dont-touch-secrets",
+      "source": {
+        "source": "github",
+        "repo": "pkyosx/claude-plugin-dont-touch-secrets"
+      },
+      "description": "Keep secret values out of the conversation transcript. Provides safe patterns (fingerprint, exit-code, HTTP-status) for validating, comparing, rotating, and inspecting credentials without the agent ever reading the value."
+    }
+  ]
+}
