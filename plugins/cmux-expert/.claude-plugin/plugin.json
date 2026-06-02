@@ -8,8 +8,8 @@
     "name": "pkyosx",
     "url": "https://github.com/pkyosx"
   },
-  "homepage": "https://github.com/pkyosx/cmux-expert",
-  "repository": "https://github.com/pkyosx/cmux-expert",
+  "homepage": "https://github.com/pkyosx/claude-plugins/tree/main/plugins/cmux-expert",
+  "repository": "https://github.com/pkyosx/claude-plugins",
   "license": "MIT",
   "keywords": [
     "cmux",
