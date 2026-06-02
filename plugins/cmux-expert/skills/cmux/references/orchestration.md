@@ -54,6 +54,19 @@ Use it for **liveness only**: spinner = busy, stable bare `❯` prompt = idle/do
 (reads your own surface). Beware **ghost text**: `❯ wait for it to finish` shown greyed is an autocomplete
 *suggestion*, not real input — just `send` your actual text.
 
+> **Targeting is verified, not folklore:** a marker `echo`'d into a spawned workspace with `--workspace WS`
+> appears in *that* workspace's `read-screen` and is **absent from the caller's own surface** — pairing the flags
+> addresses the right pane every time; dropping `--workspace` falls back to your own.
+
+### Discover & clean up
+```bash
+cmux tree --json                                  # structured topology: find a slave's workspace/pane/surface refs
+cmux list-pane-surfaces --workspace "$WS_UUID"    # surfaces within a pane
+cmux close-surface   --surface "$SLAVE_SURFACE" --workspace "$WS_UUID"   # a SPLIT-spawned slave is a surface
+cmux close-workspace --workspace "$WS_UUID"                              # a workspace-spawned slave is a workspace
+```
+Prefer `cmux tree --json` over `awk`-parsing spawn output when you need to re-find a slave you lost track of.
+
 ## Pattern 3 — supervise without polling (events / Feed)
 Instead of looping `read-screen`, subscribe to the event stream and act on real signals. See
 `references/feed-and-events.md` for the full stream + Feed-answering details. Quick form:
@@ -82,7 +95,8 @@ For long sweeps, run **one worker + one heavy resource (VM) at a time** — seri
 4. **Result channel = files / events / hooks; screen = liveness only.**
 5. **Spawn serially** (5–10s apart, ≤3 concurrent). A failed spawn is usually transient — see
    `references/troubleshooting.md`, do NOT tight-loop or ask for a relaunch.
-6. **Only close workspaces you created**; track their refs. `close-workspace --workspace workspace:N` (colon form).
+6. **Only close what you created**; track refs. Split slave → `close-surface --surface surface:N --workspace workspace:N`;
+   workspace slave → `close-workspace --workspace workspace:N` (colon form, not bare `N`).
 
 ## Source
 Distilled from a production Bash driver that implements the three-actor model and a

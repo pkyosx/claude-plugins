@@ -38,23 +38,34 @@ through to the agent's own TUI prompt — Feed is advisory, never a hard block):
 ### Install the bridge (once per agent)
 ```bash
 cmux hooks setup                  # installs Feed + notification hooks for every supported agent on PATH
-cmux hooks setup --agent codex    # or a single agent: claude / codex / opencode / gemini / copilot / …
+cmux hooks setup --agent codex    # or a single agent (see list below)
+cmux hooks codex install          # equivalent per-agent form;  cmux hooks <agent> uninstall to remove
 cmux hooks uninstall [--agent X]
 ```
-For Claude Code the hook is wrapper-injected; cmux launches Claude with `--allow-dangerously-skip-permissions`
+Supported agents (0.64.11): `codex, grok, opencode, pi, amp, cursor, gemini, kiro, antigravity (agy),
+rovodev (rovo), hermes-agent, copilot, codebuddy, factory, qoder`. Agents without a binary on `PATH` are
+skipped. **Claude Code needs no `hooks install`** — its hooks are injected automatically by the cmux Claude
+wrapper. For Claude Code the hook is wrapper-injected; cmux launches Claude with `--allow-dangerously-skip-permissions`
 so a later PermissionRequest reply can switch the session into `bypassPermissions`. (Without that flag Claude
 ignores `setMode: bypassPermissions`.) AskUserQuestion is answered by allowing the PermissionRequest with the
 selected answers patched into the tool input.
 
 ### Inspect / answer / jump
+The `cmux feed` **CLI** has only two subcommands; everything else is a **socket verb** called via `cmux rpc`:
 ```bash
 cmux feed tui                     # interactive Feed (OpenTUI via Bun); --legacy for the built-in TUI
 cmux feed clear [--yes]           # reset history (~/.cmuxterm/workstream.jsonl audit log)
+
+cmux rpc feed.list                # → { items:[{id, kind, source, cwd, created_at, …}] }  (read the workstream)
+cmux rpc feed.permission.reply '{"request_id":"…","decision":"allow"}'   # answer programmatically
+cmux rpc feed.question.reply   '{"request_id":"…", …}'                   # AskUserQuestion
+cmux rpc feed.exit_plan.reply  '{"request_id":"…", …}'                   # ExitPlanMode
+cmux rpc feed.jump '{"id":"…"}'                                          # focus the agent's workspace+surface
 ```
-Decisions can be clicked in the sidebar, in the native notification's inline buttons, or driven
-programmatically via the socket verbs `feed.permission.reply` / `feed.question.reply` / `feed.exit_plan.reply`
-(see `cmux capabilities` → `feed.*`, and `cmux rpc <method> <json>` to call them). Double-click a Feed row to
-jump to the workspace+surface where that agent runs.
+`cmux rpc feed.list` takes no params (or `{}`). Reply verbs are keyed by the event's `request_id` (get it from
+the `feed.item.received` event or `feed.list`). The full method set is in `cmux capabilities` → `feed.*`.
+Decisions can also be clicked in the sidebar or in the native notification's inline buttons; double-clicking a
+Feed row does the same as `feed.jump`.
 
 **This is the structured "answer the slave's questions" channel** that `references/orchestration.md` Pattern 3
 refers to — far more robust than reading the menu off the screen. Audit log: `~/.cmuxterm/workstream.jsonl`;
@@ -77,6 +88,13 @@ cmux notify --title "Claude Code" --subtitle "Permission" --body "Approval neede
 cmux notify --title "Done" --workspace workspace:3            # target a workspace/surface
 # Detect-and-fallback in scripts:
 command -v cmux >/dev/null && cmux notify --title "Done" --body "ok" || osascript -e 'display notification "ok" with title "Done"'
+```
+`cmux notify` is the CLI to **create** one; to read/manage them, use the `cmux rpc notification.*` socket verbs:
+```bash
+cmux rpc notification.list          # → { notifications:[ … ] }   (verified read-only)
+cmux rpc notification.dismiss '{"notification_id":"…"}'
+cmux rpc notification.mark_read '{"notification_id":"…"}'
+cmux rpc notification.jump_to_unread
 ```
 Navigate the panel in-app with `Cmd+Shift+U` (latest unread). A `Completed in <workspace>` notification is an
 **end-of-turn status, not a question** — read the screen / events before replying so you don't waste a turn.
