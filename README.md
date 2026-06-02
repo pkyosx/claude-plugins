@@ -6,14 +6,12 @@ Monorepo for pkyosx's Claude Code plugins. One marketplace, many plugins.
 
 | Plugin | What it does |
 |---|---|
-| [`agent-retro`](plugins/agent-retro) | Retrospective + experience recall loop so agents learn across sessions. |
 | [`dont-touch-secrets`](plugins/dont-touch-secrets) | Keep credential values out of the conversation transcript. |
 
 ## Install
 
 ```
 /plugin marketplace add pkyosx/claude-plugins
-/plugin install agent-retro@pkyosx-plugins
 /plugin install dont-touch-secrets@pkyosx-plugins
 ```
 
@@ -28,9 +26,6 @@ session start, so a freshly installed plugin only activates in the next session.
 .
 ├── .claude-plugin/marketplace.json   # lists every plugin
 └── plugins/
-    ├── agent-retro/
-    │   ├── .claude-plugin/plugin.json
-    │   └── skills/…
     └── dont-touch-secrets/
         ├── .claude-plugin/plugin.json
         └── skills/…
@@ -46,7 +41,7 @@ Each plugin lives under `plugins/<name>/` with its own `plugin.json` and skills.
 
 ## History
 
-`agent-retro` and `dont-touch-secrets` were originally separate repos; their full commit history was preserved here via `git subtree add`.
+`dont-touch-secrets` was originally a separate repo; its full commit history was preserved here via `git subtree add`.
 
 ## License
 
