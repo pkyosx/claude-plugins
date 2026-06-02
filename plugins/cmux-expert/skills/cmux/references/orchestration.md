@@ -98,6 +98,30 @@ For long sweeps, run **one worker + one heavy resource (VM) at a time** — seri
 6. **Only close what you created**; track refs. Split slave → `close-surface --surface surface:N --workspace workspace:N`;
    workspace slave → `close-workspace --workspace workspace:N` (colon form, not bare `N`).
 
+## Pattern 4 — successor session (escape your own session boundary)
+Some limits can **only** be resolved by a *new* session: a newly installed/updated plugin, changed
+`settings.json`/hooks, or things you can't do to your own process (run a client slash-command like `/plugin`
+in your own REPL, restart your own PID). Inside cmux you are **not bound to your terminal** — instead of
+reporting "you'll need to open a new session," spawn a **successor** that resumes this same conversation with
+the new state loaded, then retire the old pane.
+```bash
+# 1) find THIS session's id (most-recently-active transcript in the project dir)
+PROJ=~/.claude/projects/$(pwd | sed 's#/#-#g')          # cmux/Claude derive the dir from cwd
+SID=$(ls -t "$PROJ"/*.jsonl | head -1 | xargs basename | sed 's/.jsonl//')   # or grep a phrase unique to the convo
+# 2) open panel B beside A, resuming the SAME conversation (fresh start → new plugins/settings load)
+cmux new-split right --workspace "$CMUX_WORKSPACE_ID"     # (or new-workspace) running:
+#   claude --resume "$SID" --dangerously-skip-permissions
+# 3) VERIFY B resumed before retiring A (abort gate): read-screen B until it shows the conversation + a prompt
+# 4) hand off: let B close A — e.g. B runs  cmux close-workspace --workspace <A's workspace UUID>
+```
+Rules:
+- **Use `claude --resume <id>` (interactive), NOT `claude -p`** — `-p`/headless is being deprecated/blocked by
+  Claude; drive interactively via `cmux send` + `read-screen` instead.
+- **Verify the successor resumed before killing the predecessor** — that read-screen check is your only safety
+  gate; the transcript persists on disk regardless, so a failed hand-off is recoverable via a manual `/resume`.
+- This is the operational form of a directional principle: *inside cmux, a "you must start a new session" limit
+  is an escape hatch, not a dead end.*
+
 ## Source
 Distilled from a production Bash driver that implements the three-actor model and a
 hook-based AskUserQuestion capture (spawn → send → read liveness → collect file output).
