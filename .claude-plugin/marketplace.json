@@ -18,6 +18,11 @@
       "name": "dont-touch-secrets",
       "source": "./plugins/dont-touch-secrets",
       "description": "Keep secret values out of the conversation transcript. Provides safe patterns (fingerprint, exit-code, HTTP-status) for validating, comparing, rotating, and inspecting credentials without the agent ever reading the value."
+    },
+    {
+      "name": "cmux-expert",
+      "source": "./plugins/cmux-expert",
+      "description": "Expert at driving cmux from the CLI: spawn/drive slave agent sessions, automate the built-in browser, observe agents via the Feed + events stream, send notifications, and recover from daemon contention. Verified against cmux 0.64.x."
     }
   ]
 }

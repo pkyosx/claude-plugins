@@ -1,0 +1,23 @@
+{
+  "skill_name": "cmux",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Open localhost:8000 and check if there are any console errors",
+      "expected_output": "Opens a browser pane, navigates to localhost:8000, checks console errors and reports findings",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Go to https://httpbin.org/forms/post, fill in the form with some test data, and submit it",
+      "expected_output": "Opens browser, navigates to the form page, takes interactive snapshot, fills form fields, clicks submit, and reports the result",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Take a snapshot of https://news.ycombinator.com and tell me the top 3 headlines",
+      "expected_output": "Opens browser, navigates to HN, takes a snapshot, extracts and reports the top 3 story titles",
+      "files": []
+    }
+  ]
+}
