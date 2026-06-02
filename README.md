@@ -7,12 +7,14 @@ Monorepo for pkyosx's Claude Code plugins. One marketplace, many plugins.
 | Plugin | What it does |
 |---|---|
 | [`dont-touch-secrets`](plugins/dont-touch-secrets) | Keep credential values out of the conversation transcript. |
+| [`cmux-expert`](plugins/cmux-expert) | Drive [cmux](https://cmux.com) from the CLI: orchestrate slave agent sessions, automate the built-in browser, observe agents via Feed + events, and recover from daemon contention. |
 
 ## Install
 
 ```
 /plugin marketplace add pkyosx/claude-plugins
 /plugin install dont-touch-secrets@pkyosx-plugins
+/plugin install cmux-expert@pkyosx-plugins
 ```
 
 Run these in the Claude Code prompt. The first line registers the marketplace; each
@@ -26,9 +28,12 @@ session start, so a freshly installed plugin only activates in the next session.
 .
 ├── .claude-plugin/marketplace.json   # lists every plugin
 └── plugins/
-    └── dont-touch-secrets/
+    ├── dont-touch-secrets/
+    │   ├── .claude-plugin/plugin.json
+    │   └── skills/…
+    └── cmux-expert/
         ├── .claude-plugin/plugin.json
-        └── skills/…
+        └── skills/cmux/…
 ```
 
 Each plugin lives under `plugins/<name>/` with its own `plugin.json` and skills. The root `marketplace.json` references them via local paths (`"./plugins/<name>"`).
