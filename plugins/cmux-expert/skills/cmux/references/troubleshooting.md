@@ -1,18 +1,25 @@
 # Troubleshooting — cmux daemon contention & gotchas
 
 The cmux daemon is a **finite, contention-prone resource.** Most "cmux is broken" moments are *transient load*,
-and the only real fix is **patience + serial pacing**, not retrying harder. This file is the playbook that
-cost us hours to learn. When in doubt: `cmux ping` → `PONG` means the daemon is alive; act calm.
+and the only real fix is **patience + serial pacing**, not retrying harder. When in doubt: `cmux ping` → `PONG`
+means the daemon is alive; act calm.
 
-## Health probes (use these before concluding anything is broken)
+> **Provenance:** the health probes, the targeting/close-ref facts, and the upstream bug list are *verified against
+> cmux 0.64.11*. The three contention failure modes below are *field-observed from real incidents* (they can't be
+> safely re-manufactured on demand) — treat their thresholds as battle-tested heuristics, not lab constants.
+
+## Health probes (use these before concluding anything is broken) — verified 0.64.11
 ```bash
 cmux ping                                   # → PONG. Liveness. Cheap.
-cmux tree                                   # full window→workspace→pane→surface map (real state)
-cmux surface-health                         # per-surface type / in_window status
-cmux top --processes                        # CPU/mem per pane process
-cmux debug-terminals                        # low-level terminal diagnostics
+cmux tree                                   # full window→workspace→pane→surface map (real state); --json for parsing
+cmux surface-health                         # per-surface: "surface:N type=terminal in_window=true/false"
+cmux top --processes                        # per-process CPU%/MEMORY tree, grouped by workspace (find the RAM hog)
+cmux memory                                 # app footprint + child RSS; names the heaviest child group
+cmux debug-terminals                        # low-level per-surface state: mapped/tree/pty/tty/cwd/frame (deep debug)
 CMUX_QUIET=1 cmux workspace list            # workspaces (legacy alias: list-workspaces)
 ```
+`top --processes` is the fastest way to spot a runaway pane; `surface-health`/`debug-terminals` distinguish a
+real pty from a phantom (`in_window=false` / `mapped=0 tree=0` = not a live terminal).
 
 ## Failure mode 1 — phantom pane ("Terminal N", no real pty)
 **Symptom:** `new-workspace`/`new-split` returns OK, but the surface is a placeholder "Terminal N";
@@ -69,11 +76,14 @@ cmux send --workspace "$WS" "bash /path/to/work.sh ARG..."; cmux send-key --work
 - After a 3-parallel batch, let the daemon **rest 60–120s** before the next batch.
 - Long sweeps: **one worker + one heavy resource (VM) at a time.** Serial by design.
 
-## The targeting gotcha (also a "why did it hit my own pane" bug)
+## The targeting gotcha (also a "why did it hit my own pane" bug) — verified
 `cmux` defaults `--workspace`/`--surface` to **your** session's `CMUX_WORKSPACE_ID`/`CMUX_SURFACE_ID`; short
-refs are context-relative. **Always pass `--workspace <WS> --surface <S>` together** for another pane. Never
-`cmux rpc surface.read_text` for cross-pane reads (it reads your own surface) — use
-`cmux read-screen --workspace <WS> --surface <S>`.
+refs are context-relative. **Always pass `--workspace <WS> --surface <S>` together** for another pane.
+- **Verified:** `cmux rpc surface.read_text {"surface":"surface:N"}` targeting another pane returned **0** of that
+  pane's content, while `cmux read-screen --workspace <WS> --surface <S>` returned it. Never use `rpc` for
+  cross-pane reads — always `read-screen`.
+- **Verified:** `close-workspace --workspace 14` (bare number) → `Error: Workspace index not found` (a bare
+  number is read as a workspace *index*, not a ref). Use the **colon ref**: `close-workspace --workspace workspace:14`.
 
 ## Process isolation — don't kill the user's interactive sessions
 A broad `pkill` once killed an unrelated interactive session as collateral. Hard rules:
