@@ -1,0 +1,116 @@
+{
+  "skill_name": "gap-swimlane",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "trigger-gap-swimlane-request",
+      "prompt": "幫我把 SHOP-128 的三支 PR 畫成缺口泳道圖，我想看 PR 補了哪些缺口、還剩什麼風險。",
+      "expected_output": "Loads gap-swimlane, plans the research step (Jira AC, PR diffs at merge base and head), and stays read-only.",
+      "files": [],
+      "expectations": [
+        {
+          "name": "skill-invoked",
+          "type": "behavior",
+          "description": "A request for a 缺口泳道圖 of a ticket's PRs triggers gap-swimlane",
+          "check": "Transcript shows the gap-swimlane skill loaded"
+        },
+        {
+          "name": "read-only",
+          "type": "behavior",
+          "description": "Does not comment on PRs or Jira, push, or start a sandbox",
+          "check": "No gh pr comment, gh pr review, Jira comment, git push or sandbox command appears in the transcript"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "trigger-english-phrasing",
+      "prompt": "Can you make a gap swimlane for SHOP-204 so the reviewer can see what the orders-api, rules-engine and admin-web PRs change end to end?",
+      "expected_output": "Loads gap-swimlane and treats it as a cross-service PR visualization with gaps, AC and remaining risks.",
+      "files": [],
+      "expectations": [
+        {
+          "name": "skill-invoked",
+          "type": "behavior",
+          "description": "English 'gap swimlane' phrasing triggers the skill",
+          "check": "Transcript shows the gap-swimlane skill loaded"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "badge-only-on-modified-step",
+      "prompt": "我在畫缺口泳道圖。缺口 2 是「只改包裝方式時訂單服務不發欄位變動事件」，發生在既有的「發 updated 事件」步驟，但 PR 改的是前面的快照和後面的比對，「發 updated 事件」這段程式沒動。缺口 2 的徽章要掛在哪些節點？",
+      "expected_output": "Puts badge 2 only on the snapshot and comparison steps the PR modified, not on the unchanged 'send updated event' step, and suggests marking that step 既有流程，本票沒改.",
+      "files": [],
+      "expectations": [
+        {
+          "name": "badge-placement",
+          "type": "behavior",
+          "description": "Badges go only on steps the PR actually modified",
+          "check": "Output says not to put badge 2 on the unchanged 發 updated 事件 node and names the snapshot and comparison steps instead"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "eval_name": "ac-mapping-only-when-clear",
+      "prompt": "缺口泳道圖的缺口 6 是「防重送 Idempotency-Key」，票面 AC 沒有一條講到重送或 idempotency，最接近的是 AC-05「one email per order」。缺口 6 的 acs 要填什麼？",
+      "expected_output": "Leaves gap 6 without an AC mapping rather than forcing AC-05, and lists it as unmapped in the delivery message.",
+      "files": [],
+      "expectations": [
+        {
+          "name": "no-forced-ac",
+          "type": "behavior",
+          "description": "Maps a gap to an AC only when the link is clear",
+          "check": "Output leaves acs empty for gap 6 and says it will be reported as unmapped, instead of assigning AC-05"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "eval_name": "no-self-review",
+      "prompt": "缺口泳道圖畫好了，但現在沒有其他成員可以複核，我自己再檢查一次就交付可以嗎？",
+      "expected_output": "Says the review must come from someone who did not make the page; delivers marked as not yet independently reviewed instead of self-reviewing.",
+      "files": [],
+      "expectations": [
+        {
+          "name": "independent-review",
+          "type": "behavior",
+          "description": "The author does not stand in for the reviewer",
+          "check": "Output says the page will be delivered marked 尚未經獨立複核 (or equivalent) rather than treating a self-check as the review"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "eval_name": "non-trigger-plain-flowchart",
+      "prompt": "Draw a flowchart of our release process for the team wiki.",
+      "expected_output": "Does not load gap-swimlane; a plain process flowchart belongs to a general diagram skill.",
+      "files": [],
+      "expectations": [
+        {
+          "name": "skill-not-invoked",
+          "type": "behavior",
+          "description": "gap-swimlane stays out of plain flowcharts",
+          "check": "Transcript does not show the gap-swimlane skill loaded"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "eval_name": "non-trigger-pr-approval",
+      "prompt": "Review example-org/orders-api#412 and tell me if it is safe to approve.",
+      "expected_output": "Does not load gap-swimlane; approving a PR is a code review, not a visualization.",
+      "files": [],
+      "expectations": [
+        {
+          "name": "skill-not-invoked",
+          "type": "behavior",
+          "description": "A PR approval request is not a gap swimlane",
+          "check": "Transcript does not show the gap-swimlane skill loaded"
+        }
+      ]
+    }
+  ]
+}

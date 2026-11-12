@@ -18,6 +18,11 @@
       "name": "cmux-expert",
       "source": "./plugins/cmux-expert",
       "description": "Expert at driving cmux from the CLI: spawn/drive slave agent sessions, automate the built-in browser, observe agents via the Feed + events stream, send notifications, and recover from daemon contention. Verified against cmux 0.64.x."
+    },
+    {
+      "name": "gap-swimlane",
+      "source": "./plugins/gap-swimlane",
+      "description": "Draws a Jira ticket's PRs as a gap swimlane HTML page: the after-change flow, the gaps each PR fills, related AC and remaining risks. Fixed HTML template plus a JSON spec, with automatic layout."
     }
   ]
 }

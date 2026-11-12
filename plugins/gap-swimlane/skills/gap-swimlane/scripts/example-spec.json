@@ -1,0 +1,67 @@
+{
+ "title": "SHOP-128 缺口泳道圖（精簡範例）",
+ "summary": "規則平台的「訂單已更新」觸發要能在訂單的包裝方式改變時啟動規則。改動前，設定畫面沒有包裝方式可選，訂單服務只改包裝方式時也不發欄位變動事件[[確認]]。下圖是 PR 合併後的流程。本範例是虛構情境。",
+ "pr_status": "正式 PR、未合併",
+ "note": "**只讀程式與留言，未實際執行。**本頁根據上表版本的程式碼、PR 討論與票面留言整理。標「推論」的項目是依程式或說明判讀、未經驗證的結論。PR 改版後本頁不會自動更新，要重跑。",
+ "prs": [
+  {"key": "orders", "name": "orders-api#412", "url": "https://github.com/example-org/orders-api/pull/412", "base": "a1b2c3d4e5f", "head": "f5e4d3c2b1a"},
+  {"key": "rules", "name": "rules-engine#87", "url": "https://github.com/example-org/rules-engine/pull/87", "base": "0a1b2c3d4e5", "head": "5e4d3c2b1a0"}
+ ],
+ "acs": [
+  {"id": "AC-01", "text": "On the **Order updated** trigger, **Run When Any of These Fields Change** offers **Packaging**."},
+  {"id": "AC-02", "text": "With Packaging selected, changing or clearing an order's packaging and saving runs the rule once."},
+  {"id": "AC-03", "text": "Saving the order without changing any selected field does not run the rule."}
+ ],
+ "lanes": [
+  {"id": "SA", "name": "rules-engine", "sub": ["觸發清單、事件比對"], "rows": 2},
+  {"id": "FM", "name": "訂單服務", "sub": ["orders-api 存檔流程"], "rows": 2, "row_height": 66},
+  {"id": "OP", "name": "店員", "sub": ["訂單頁"]}
+ ],
+ "nodes": [
+  {"id": "a0", "lane": "SA", "col": 1, "row": 0, "title": "提供欄位清單", "sub": "訂單已更新加包裝方式", "gaps": [1],
+   "detail": "觸發宣告可觀察的欄位，rules-engine#87 加入 packaging。"},
+  {"id": "a1", "lane": "SA", "col": 3, "row": 1, "title": "比對規則選的欄位", "sub": "任一選的欄位有變就跑", "gaps": [3], "risks": ["A"],
+   "detail": "規則選的欄位與事件回報有變的欄位有交集就跑，比對程式沒有改。"},
+  {"id": "a2", "lane": "SA", "col": 4, "row": 0, "title": "規則執行", "sub": "包裝方式有變",
+   "detail": "規則照設定執行，每次存檔只跑一次。"},
+  {"id": "a3", "lane": "SA", "col": 4, "row": 1, "title": "略過規則", "sub": "選的欄位都沒變", "kind": "fail",
+   "detail": "沒有交集時規則不跑，只記 INFO log。"},
+  {"id": "m1", "lane": "FM", "col": 1, "row": 0, "title": "存訂單", "sub": "取存檔前後的快照", "gaps": [2],
+   "detail": "改動後快照多了 packaging，值是選項 id。"},
+  {"id": "m2", "lane": "FM", "col": 2, "row": 0, "title": "一般 diff 有內容？", "sub": "既有流程，本票沒改",
+   "detail": "一般 diff 依選項顯示名稱比較，這段程式 PR 沒有改。"},
+  {"id": "m3", "lane": "FM", "col": 3, "row": 1, "title": "快照有欄位變動？", "sub": "packaging 比選項 id", "gaps": [2],
+   "detail": "比較存檔前後快照，packaging 比的是選項 id。"},
+  {"id": "u1", "lane": "OP", "col": 0, "row": 0, "title": "改訂單包裝方式", "sub": "訂單頁、列表",
+   "detail": "店員設定、換掉或清除訂單的包裝方式。"}
+ ],
+ "edges": [
+  {"from": "u1", "to": "m1", "label": "存檔", "route": "vh"},
+  {"from": "m1", "to": "m2"},
+  {"from": "m2", "to": "m3"},
+  {"from": "m3", "to": "a1", "label": "有變動：發事件"},
+  {"from": "a1", "to": "a2"},
+  {"from": "a1", "to": "a3", "route": "bus"}
+ ],
+ "gaps": [
+  {"n": 1, "title": "設定畫面可以選包裝方式", "prs": ["rules"], "acs": ["AC-01"],
+   "before": "「訂單已更新」觸發沒有包裝方式可選。", "before_basis": "確認",
+   "after": "rules-engine 在觸發加入包裝方式，設定畫面依觸發清單自動顯示。",
+   "eng": "rules-engine triggers 宣告與規則目錄 contract"},
+  {"n": 2, "title": "訂單服務回報包裝方式變更，只看選項 id", "prs": ["orders"], "acs": ["AC-02"],
+   "before": "欄位快照沒有 packaging，只改包裝方式時不發欄位變動事件。", "before_basis": "確認",
+   "after": "訂單快照加入 packaging，值是選項 id。",
+   "eng": "orders-api Order.watched_fields_snapshot"},
+  {"n": 3, "title": "rules-engine 比對包裝方式", "prs": ["rules"], "acs": ["AC-02", "AC-03"],
+   "before": "事件就算帶了 packaging，rules-engine 也當成未宣告欄位丟棄。", "before_basis": "確認",
+   "after": "宣告 packaging 後，規則有選且事件回報有變時就跑。",
+   "eng": "rules-engine 事件欄位檢查"}
+ ],
+ "risks": [
+  {"key": "A", "title": "部署順序：rules-engine 先於訂單服務上線",
+   "text": "訂單服務未部署期間，包裝方式可以選但不會觸發，每則事件都記一筆 ERROR。",
+   "basis": "確認（程式路徑，未實測）", "eng": "rules-engine 事件欄位檢查"}
+ ],
+ "out_of_scope": [],
+ "limits": ["本範例是虛構情境，流程圖只畫包裝方式的觸發路徑。"]
+}

@@ -8,6 +8,7 @@ Monorepo for pkyosx's Claude Code plugins. One marketplace, many plugins.
 |---|---|
 | [`dont-touch-secrets`](plugins/dont-touch-secrets) | Keep credential values out of the conversation transcript. |
 | [`cmux-expert`](plugins/cmux-expert) | Drive [cmux](https://cmux.com) from the CLI: orchestrate slave agent sessions, automate the built-in browser, observe agents via Feed + events, and recover from daemon contention. |
+| [`gap-swimlane`](plugins/gap-swimlane) | Draw a ticket's PRs as a gap swimlane HTML page: the after-change flow, the gaps each PR fills, related AC and remaining risks. |
 
 ## Install
 
@@ -15,6 +16,7 @@ Monorepo for pkyosx's Claude Code plugins. One marketplace, many plugins.
 /plugin marketplace add pkyosx/claude-plugins
 /plugin install dont-touch-secrets@pkyosx-plugins
 /plugin install cmux-expert@pkyosx-plugins
+/plugin install gap-swimlane@pkyosx-plugins
 ```
 
 Run these in the Claude Code prompt. The first line registers the marketplace; each
@@ -31,9 +33,12 @@ session start, so a freshly installed plugin only activates in the next session.
     ├── dont-touch-secrets/
     │   ├── .claude-plugin/plugin.json
     │   └── skills/…
-    └── cmux-expert/
+    ├── cmux-expert/
+    │   ├── .claude-plugin/plugin.json
+    │   └── skills/cmux/…
+    └── gap-swimlane/
         ├── .claude-plugin/plugin.json
-        └── skills/cmux/…
+        └── skills/gap-swimlane/…
 ```
 
 Each plugin lives under `plugins/<name>/` with its own `plugin.json` and skills. The root `marketplace.json` references them via local paths (`"./plugins/<name>"`).
